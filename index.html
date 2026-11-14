@@ -273,13 +273,15 @@ async function commit(s){S=s;ask=null;if(LOCAL){me=S.pl[S.turn]?S.pl[S.turn].id:
 function hostMsg(cn,d){if(!d)return;if(d.t==='join'){const ex=S.pl.some(p=>p.id===d.id);if(S.phase==='lobby'&&!ex&&S.pl.length<10){const s=clone(S);s.pl.push(mkP(String(d.id),String(d.name).replace(/[<>&"'`]/g,'').slice(0,12)));commit(s)}else cn.send({t:'s',s:S})}else if(d.t==='act')hostApply(String(d.id),d.o)}
 function create(){me=pid();code=String(Math.floor(1000+Math.random()*9000));toast('بجهّز الغرفة…');startHost(code,{phase:'lobby',pl:[mkP(me,nmv())]})}
 function startHost(c,st){code=c;peer=new Peer('bkh-'+c);
- peer.on('open',()=>{HOST=true;S=st;render()});
+ peer.on('open',()=>{if(!HOST){HOST=true;S=st;toast('الغرفة جاهزة ✅ كود: '+c)}render()});
+ peer.on('disconnected',()=>{toast('الاتصال بالخادم انقطع، برجّعه…');try{peer.reconnect()}catch(e){}});setInterval(()=>{try{if(peer&&peer.disconnected)peer.reconnect()}catch(e){}},4000);
  peer.on('error',e=>toast(e.type==='unavailable-id'?'جرّب تاني':'مشكلة اتصال: '+e.type));
  peer.on('connection',cn=>{cn.on('open',()=>conns.push(cn));cn.on('data',d=>hostMsg(cn,d));cn.on('close',()=>{conns=conns.filter(x=>x!==cn)})})}
 const RES=()=>{try{const v=JSON.parse(localStorage.getItem('bksave')||'null');if(v&&v.S&&v.S.phase==='play')return '<hr><button class=b onclick="resume()">▶ كمّل اللعبة المحفوظة (غرفة '+v.code+')</button>'}catch(e){}return ''};
 function resume(){try{const v=JSON.parse(localStorage.getItem('bksave'));me=pid();toast('برجّع الغرفة…');startHost(v.code,v.S)}catch(e){toast('تعذر الاستعادة')}}
-function join(){me=pid();code=$('cd').value.trim();if(!code){toast('اكتب كود الغرفة');return}const n=nmv();toast('بدخل الغرفة…');peer=new Peer();
- peer.on('open',()=>{conn=peer.connect('bkh-'+code,{reliable:true});conn.on('open',()=>conn.send({t:'join',id:me,name:n}));conn.on('data',d=>{if(d&&d.t==='s'){S=d.s;ask=null;render()}});conn.on('close',()=>toast('انقطع الاتصال بالمضيف'));setTimeout(()=>{if(!S)toast('مفيش غرفة بالكود ده، أو المضيف قافل الصفحة')},9000)});
- peer.on('error',e=>toast(e.type==='peer-unavailable'?'مفيش غرفة بالكود ده':'مشكلة اتصال: '+e.type))}
+function join(){me=pid();code=$('cd').value.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(!code){toast('اكتب كود الغرفة');return}const n=nmv();let tries=0;toast('بدخل الغرفة…');peer=new Peer();
+ const go=()=>{conn=peer.connect('bkh-'+code,{reliable:true});conn.on('open',()=>conn.send({t:'join',id:me,name:n}));conn.on('data',d=>{if(d&&d.t==='s'){S=d.s;ask=null;render()}});conn.on('close',()=>toast('انقطع الاتصال بالمضيف'))};
+ peer.on('open',()=>{go();setTimeout(()=>{if(!S)toast('لسه مفيش رد من المضيف. تأكد إن صفحته مفتوحة والكود صح')},12000)});
+ peer.on('error',e=>{if(e.type==='peer-unavailable'&&!S&&tries<3){tries++;toast('بحاول أدخل تاني ('+tries+'/3)…');setTimeout(go,2000)}else toast(e.type==='peer-unavailable'?'مفيش غرفة بالكود ده. تأكد إن المضيف فاتح الصفحة والكود صح':'مشكلة اتصال: '+e.type)})}
 render();
 </script></body></html>
