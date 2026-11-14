@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>بنك الخربطة</title>
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eaf6f3;--fg:#2b2a33;--mut:#7b8794;--card:#fffdf8;--ac:#ec6a2c;--ln:#ead9b8;--ok:#15803d;--gold:#e9b44c;--sil:#d7bd8f;--nile:#6bbbd6;--oc:#999;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -250,7 +249,7 @@ function panelOld(){const p=S.pl[S.turn],m=S.pl.find(x=>x.id===me),mine=p.id===m
  if(ask&&mine){const o=opts(ask.k,m);ab='<div class=card><b>'+AB[ask.k][1]+': اختار</b><br>'+o.map(x=>'<button class=b onclick="act(\'u\','+ask.i+','+x[0]+')">'+x[1]+'</button>').join('')+'<button class="b g" onclick="ask=null;render()">إلغاء</button></div>'}
  return '<div class=card>'+h+'</div>'+ab}
 function render(){const A=$('app');if(S&&S.phase==='play'&&S.en!==LASTEN){const pr=PREV;PREV=S;LASTEN=S.en;PV=null;fx(pr,S)}
- if(!S){A.innerHTML='<h1>🏦 بنك الخربطة</h1><p class=mut>لعبة لوحة أونلاين: من غير نرد، بكروت حركة وقدرات.</p><input id=nm placeholder="اسمك" maxlength=12><button class=b onclick="create()">اعمل غرفة جديدة</button><input id=cd placeholder="كود الغرفة" inputmode=numeric><button class="b g" onclick="join()">ادخل غرفة</button><hr><p class=mut>أو العبوا كلكم على موبايل واحد من غير حسابات (الكارتات بتبان للكل):</p><input id=lp placeholder="الأسماء بفاصلة: أحمد، سارة، علي"><button class="b g" onclick="localStart()">ابدأ على جهاز واحد</button>'+RES();return}
+ if(!S){A.innerHTML='<h1>🏦 بنك الخربطة</h1><p class=mut>لعبة لوحة أونلاين: من غير نرد، بكروت حركة وقدرات.</p><input id=nm placeholder="اسمك" maxlength=12><button class=b onclick="create()">اعمل غرفة جديدة</button><input id=cd placeholder="كود الغرفة" autocapitalize=characters autocomplete=off><button class="b g" onclick="join()">ادخل غرفة</button><hr><p class=mut>أو العبوا كلكم على موبايل واحد من غير حسابات (الكارتات بتبان للكل):</p><input id=lp placeholder="الأسماء بفاصلة: أحمد، سارة، علي"><button class="b g" onclick="localStart()">ابدأ على جهاز واحد</button>'+RES();return}
  if(S.phase==='lobby'){A.innerHTML='<h1>غرفة '+code+'</h1><p class=mut>ابعت الكود والرابط لصحابك (3 لـ10). مفيش حسابات. وانت (المضيف) لازم تفضل فاتح الصفحة.</p><div class=card>'+S.pl.map((p,i)=>'<div class=pl><span>'+pw(PC[i],16)+''+p.name+'</span></div>').join('')+'</div>'+(S.pl[0].id===me?'<button class=b '+(S.pl.length<3?'disabled':'')+' onclick="start()">ابدأ اللعبة ('+S.pl.length+')</button>'+(S.pl.length<3?'<p class=mut>محتاج 3 لاعبين على الأقل</p>':''):'<p>مستني صاحب الغرفة يبدأ…</p>');return}
  if(S.phase==='end'){const r=S.pl.map((p,i)=>[p,val(S,i)]).sort((a,b)=>b[1]-a[1]);A.innerHTML='<h1>🏆 '+r[0][0].name+' كسب!</h1><div class=card>'+r.map((x,i)=>'<div class=pl><span>'+(i+1)+'. '+x[0].name+(x[0].out?' (أفلس)':'')+'</span><b>'+x[1]+'</b></div>').join('')+'</div><button class=b onclick="location.reload()">لعبة جديدة</button>';return}
  const ABH=panel();A.innerHTML=TOP()+'<div class=bd>'+T.map((_,i)=>cell(i)).join('')+'<div class=mid>'+(S.chaos?'<div class=ch>🌪 '+S.chaos.name+'</div>':'')+'<div class=ah>'+AH+'</div><div class=lgs>'+S.log.slice(0,2).join('<br>')+'</div></div></div>'+ABH+
@@ -270,19 +269,31 @@ function apply(s,o){const t=o.a;if(t==='m')move(s,o.i,o.d);else if(t==='b')burn(
 function hostApply(id,o){if(!S||S.phase!=='play'||S.pl[S.turn].id!==id||!ok(o))return;const s=clone(S);s.evs=[];s.mv2=null;s.en=(s.en||0)+1;apply(s,o);commit(s)}
 function act(a,i,d){const o={a,i,d};if(LOCAL||HOST)hostApply(me,o);else if(conn&&conn.open)conn.send({t:'act',id:me,o});else toast('مفيش اتصال')}
 async function commit(s){S=s;ask=null;if(LOCAL){me=S.pl[S.turn]?S.pl[S.turn].id:me;render();return}if(HOST){try{if(s.phase==='play')localStorage.setItem('bksave',JSON.stringify({code,S:s}));else localStorage.removeItem('bksave')}catch(e){}}render();conns.forEach(c=>{try{c.open&&c.send({t:'s',s})}catch(e){}})}
-function hostMsg(cn,d){if(!d)return;if(d.t==='join'){const ex=S.pl.some(p=>p.id===d.id);if(S.phase==='lobby'&&!ex&&S.pl.length<10){const s=clone(S);s.pl.push(mkP(String(d.id),String(d.name).replace(/[<>&"'`]/g,'').slice(0,12)));commit(s)}else cn.send({t:'s',s:S})}else if(d.t==='act')hostApply(String(d.id),d.o)}
-function create(){me=pid();code=String(Math.floor(1000+Math.random()*9000));toast('بجهّز الغرفة…');startHost(code,{phase:'lobby',pl:[mkP(me,nmv())]})}
-const PCFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turn:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]}};
-function startHost(c,st){code=c;peer=new Peer('bkh-'+c,PCFG);
- peer.on('open',()=>{if(!HOST){HOST=true;S=st;toast('الغرفة جاهزة ✅ كود: '+c)}render()});
- peer.on('disconnected',()=>{toast('الاتصال بالخادم انقطع، برجّعه…');try{peer.reconnect()}catch(e){}});setInterval(()=>{try{if(peer&&peer.disconnected)peer.reconnect()}catch(e){}},4000);
- peer.on('error',e=>toast(e.type==='unavailable-id'?'جرّب تاني':'مشكلة اتصال: '+e.type));
- peer.on('connection',cn=>{cn.on('open',()=>conns.push(cn));cn.on('data',d=>hostMsg(cn,d));cn.on('close',()=>{conns=conns.filter(x=>x!==cn)})})}
+function hostMsg(cn,d){if(!d)return;if(d.t==='join'){cn.ok=true;const ex=S.pl.some(p=>p.id===d.id);if(S.phase==='lobby'&&!ex&&S.pl.length<10){const s=clone(S);s.pl.push(mkP(String(d.id),String(d.name).replace(/[<>&"'`]/g,'').slice(0,12)));commit(s)}else cn.send({t:'s',s:S})}else if(d.t==='act'&&cn.ok)hostApply(String(d.id),d.o)}
+function create(){me=pid();toast('بجهّز الغرفة…');startHost(null,{phase:'lobby',pl:[mkP(me,nmv())]})}
+const BRK=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081'];
+const ALPH='ABCDEFGHJKMNPQRSTUVWXYZ23456789',rc=n=>Array.from({length:n},()=>ALPH[Math.floor(Math.random()*ALPH.length)]).join('');
+let mq=null,base='',cmap={};
+function mconn(i,ok,fail){const c=mqtt.connect(BRK[i],{clientId:'bkh_'+rc(10),reconnectPeriod:2000,connectTimeout:7000,clean:true});let done=false;
+ c.on('connect',()=>{if(!done){done=true;ok(c)}});c.on('error',()=>{});
+ setTimeout(()=>{if(!done){done=true;try{c.end(true)}catch(e){}fail()}},8000)}
+function startHost(c,st){HOST=false;
+ const tryB=i=>{if(i>=BRK.length){toast('تعذر الاتصال بأي خادم، جرّب شبكة تانية');return}
+  const idx=c?Number(c[0])-1:i;
+  mconn(idx,cl=>{mq=cl;code=c||String(idx+1)+rc(7);base='bkhg/'+code;cl.subscribe(base+'/up');
+   cl.on('message',(t,p)=>{let m;try{m=JSON.parse(p.toString())}catch(e){return}if(!m.from||!m.d)return;
+    let cn=cmap[m.from];if(!cn){cn=cmap[m.from]={ok:false,get open(){return !!mq&&mq.connected},send:x=>{try{mq.publish(base+'/dn/'+m.from,JSON.stringify(x))}catch(e){}}};conns.push(cn)}hostMsg(cn,m.d)});
+   if(!HOST){HOST=true;S=st;toast('الغرفة جاهزة ✅ كود: '+code)}render()},()=>{c?toast('تعذر الاتصال بالخادم'):tryB(i+1)})};
+ tryB(0)}
 const RES=()=>{try{const v=JSON.parse(localStorage.getItem('bksave')||'null');if(v&&v.S&&v.S.phase==='play')return '<hr><button class=b onclick="resume()">▶ كمّل اللعبة المحفوظة (غرفة '+v.code+')</button>'}catch(e){}return ''};
 function resume(){try{const v=JSON.parse(localStorage.getItem('bksave'));me=pid();toast('برجّع الغرفة…');startHost(v.code,v.S)}catch(e){toast('تعذر الاستعادة')}}
-function join(){me=pid();code=$('cd').value.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');if(!code){toast('اكتب كود الغرفة');return}const n=nmv();let tries=0;toast('بدخل الغرفة…');peer=new Peer(undefined,PCFG);
- const go=()=>{conn=peer.connect('bkh-'+code,{reliable:true});conn.on('open',()=>conn.send({t:'join',id:me,name:n}));conn.on('data',d=>{if(d&&d.t==='s'){S=d.s;ask=null;render()}});conn.on('close',()=>toast('انقطع الاتصال بالمضيف'))};
- peer.on('open',()=>{go();setTimeout(()=>{if(!S)toast('لسه مفيش رد من المضيف. تأكد إن صفحته مفتوحة والكود صح')},12000)});
- peer.on('error',e=>{if(e.type==='peer-unavailable'&&!S&&tries<3){tries++;toast('بحاول أدخل تاني ('+tries+'/3)…');setTimeout(go,2000)}else toast(e.type==='peer-unavailable'?'مفيش غرفة بالكود ده. تأكد إن المضيف فاتح الصفحة والكود صح':'مشكلة اتصال: '+e.type)})}
+function join(){me=pid();code=$('cd').value.toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==8||!'123'.includes(code[0])){toast('الكود غلط، لازم 8 حروف وأرقام');return}const n=nmv();toast('بدخل الغرفة…');base='bkhg/'+code;
+ const jm={t:'join',id:me,name:n};
+ mconn(Number(code[0])-1,cl=>{mq=cl;cl.subscribe(base+'/dn/'+me);
+  conn={get open(){return !!mq&&mq.connected},send:x=>mq.publish(base+'/up',JSON.stringify({from:me,d:x}))};
+  cl.on('message',(t,p)=>{let d;try{d=JSON.parse(p.toString())}catch(e){return}if(d&&d.t==='s'){S=d.s;ask=null;render()}});
+  cl.on('connect',()=>conn.send(jm));conn.send(jm);
+  setInterval(()=>{if(!S&&conn.open)conn.send(jm)},3000);
+  setTimeout(()=>{if(!S)toast('لسه مفيش رد. اتأكد من الكود وإن المضيف فاتح الصفحة')},10000)},()=>toast('تعذر الاتصال بالخادم، جرّب تاني'))}
 render();
 </script></body></html>
