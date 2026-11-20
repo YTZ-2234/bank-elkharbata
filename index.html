@@ -513,7 +513,7 @@ function dockMain(){const p=S.pl[S.turn],m=meP(),mine=p.id===me;
  if(S.auc)return `<p class=tn>🔨 مزاد على ${T[S.auc.q[0]].n} — أعلى سعر ${S.auc.by>=0?S.auc.bid+' ('+S.pl[S.auc.by].name+')':'لسه'}</p><button class=b onclick="PEEK=0;render()">افتح المزاد</button>`;
  if(S.trade&&mine)return `<p class=tn>مستني رد ${S.pl[S.trade.to].name} على عرضك ⏳</p><button class="b g" onclick="act('tc')">إلغاء العرض</button>`;
  if(S.trade)return `<p class=tn>${S.pl[S.trade.from].name} عارض صفقة على ${S.pl[S.trade.to].name}…</p>`;
- if(!mine)return `<p class=tn>الدور على ${p.name} ⏳</p><p class=mut>${p.jail?'🔒 محبوس عند منصور':'تقدر تتفرج على الخانات بالضغط عليها'}</p>`;
+ if(!mine)return `<p class=tn>الدور على ${p.name} ⏳</p>${isOff(p.id)?'<p class=mut>📴 '+p.name+' مش متصل — لو مارجعش الموبايل هيلعب بداله بعد ثواني</p>':''}<p class=mut>${p.jail?'🔒 محبوس عند منصور':'تقدر تتفرج على الخانات بالضغط عليها'}</p>`;
  const who=LOCAL?`<p class=mut style="margin:0">الدور على <b style="color:${colOf(S.turn)}">${p.name}</b></p>`:'';
  if(S.stage==='jail'){const bl=S.cfg.bail;return who+`<p class=tn>🔒 إنت في سجن منصور — محاولة ${p.jail} من 3</p><p class=mut>ارمي دوبل تخرج ببلاش، أو ادفع كفالة ${bl} وارمي عادي.${S.cfg.jrent?' وإنت جوه محدش بيدفعلك إيجار.':''}</p><div class=btns><button class="b" onclick="act('jr')">🎲 جرّب دوبل</button><button class="b g" ${p.cash<bl?'disabled':''} onclick="act('jb')">💵 ادفع ${bl}</button>${p.ab.includes('jailfree')?`<button class="b g" onclick="act('jf')">🗝 معرفة في القسم</button>`:''}</div>`}
  if(S.stage==='buy'&&S.pend.m!==null){const pe=S.pend,t=T[pe.t],pr=price(S),x=pe.m,short=m.cash<pr;
@@ -526,9 +526,9 @@ function cardsHTML(m){const mine=S.pl[S.turn]===m;
  return m.ab.length?'<div class=cgrid>'+m.ab.map((k,i)=>{const o=opts(k,m),pas=AB[k][3]==='J',dis=pas||!(mine&&S.stage==='move'&&!S.trade)||(o&&!o.length);
   return `<div class=pc ${dis?'disabled':''} onclick="${o?`TRAY=0;ask={i:${i},k:'${k}'};render()`:`TRAY=0;act('u',${i})`}"><span class=ic>${AB[k][0]}</span><b>${AB[k][1]}</b><small>${AB[k][2]}</small></div>`}).join('')+'</div><p class=mut>الكروت بتتلعب في دورك قبل ما ترمي النرد</p>':'<p class=mut>مفيش كروت. اوقف على السوق 🛍</p>'}
 function PLAY(){const m=meP(),cur=S.pl[S.turn],myt=cur.id===me&&!S.trade,n=S.pl.length,cols=n<=4?n:n<=6?3:n<=8?4:5;
- const chips=S.pl.map((p,i)=>`<div id="pp${i}" class="pp${i===S.turn?' on':''}${p.id===me&&!LOCAL?' me':''}${p.out?' out':''}" onclick="PI=${i};render()"><span class=av>${pieceOf(i)}</span><b class=nm>${p.role?ROLES[p.role][0]:''}${p.name}${p.jail?' 🔒':''}</b><span class=cs>💵 ${fmt(p.cash)}</span></div>`).join('');
+ const chips=S.pl.map((p,i)=>`<div id="pp${i}" class="pp${i===S.turn?' on':''}${p.id===me&&!LOCAL?' me':''}${p.out?' out':''}" onclick="PI=${i};render()"><span class=av>${pieceOf(i)}</span><b class=nm>${p.role?ROLES[p.role][0]:''}${p.name}${p.jail?' 🔒':''}${isOff(p.id)&&!p.out?' 📴':''}</b><span class=cs>💵 ${fmt(p.cash)}</span></div>`).join('');
  const mid=`<div class=mid><div class=lg1>بنك الخربطة</div>${DICE()}<div class=tr>${LAKE} الكنز ${fmt(S.tr||0)}</div>${S.chaos?`<div class=cz>🌪 ${S.chaos.name}</div>`:''}<div class=lgs>${S.log.slice(0,3).join('<br>')}</div></div>`;
- const hd=`<div class=hd><div class=chs><span class=ch>🎲 جولة ${S.round}</span><span class="ch gt" id=clk>${clockTxt()}</span>${S.cfg.timer?'<span class="ch tmr" id=tmr>⏱</span>':''}</div><div class=ib><button onclick="LOGO=1;render()" aria-label="السجل">📜</button><button onclick="MN='rules';render()" aria-label="القواعد">📖</button><button onclick="MN='prefs';render()" aria-label="الإعدادات">⚙️</button></div></div>`;
+ const hd=`<div class=hd><div class=chs><span class=ch>🎲 جولة ${S.round}</span>${HOSTOFF?'<span class="ch tmr">📡 المضيف مش متصل…</span>':''}<span class="ch gt" id=clk>${clockTxt()}</span>${S.cfg.timer?'<span class="ch tmr" id=tmr>⏱</span>':''}</div><div class=ib><button onclick="LOGO=1;render()" aria-label="السجل">📜</button><button onclick="MN='rules';render()" aria-label="القواعد">📖</button><button onclick="MN='prefs';render()" aria-label="الإعدادات">⚙️</button></div></div>`;
  const quick='<div class=qr>'+FAB('بناء','🏗',"MN='build';render()",!m||m.out)+FAB(TRD?'كمّل الصفقة':'تبادل','🤝','openTrade()',!myt||!AFT()||!S.cfg.trade)+FAB('كروتي ('+(m?m.ab.length:0)+')','🎴','TRAY=1;render()',!m)+FAB('القايمة','💼',"MN='menu';render()",!m)+'</div>';
  return `<div id=v2 class="${PF.t3?'t3':''}">${hd}<div class=strip style="--n:${cols}">${chips}</div><div class=stage id=stage>${PF.zb?`<div class=zb><button onclick="zoomBy(1.4)" aria-label="تكبير">＋</button><button onclick="zoomBy(1/1.4)" aria-label="تصغير">－</button><button onclick="UZ=null;camApply()" aria-label="اللوحة كلها">⤢</button></div>`:''}<div class=tilt><div class=bd id=bd>${T.map((_,i)=>cell(i)).join('')}${mid}<div id=pwl></div></div></div></div><div class=dock id=dock><div class=main>${dockMain()}</div>${quick}</div>${TRAY&&m?`<div class=tray onclick="if(event.target===this){TRAY=0;render()}"><div class=trayin><h3>🎴 كروتي</h3>${cardsHTML(m)}<button class="b g w" onclick="TRAY=0;render()">قفل</button></div></div>`:''}</div>`}
 function clockTxt(){if(!S||!S.gt)return '⏱ 0:00';const now=Date.now()-OFF,el=Math.floor((now-S.gt)/1000);if(S.cfg.gmin){const l=Math.max(0,S.cfg.gmin*60-el);return '⏳ '+Math.floor(l/60)+':'+String(l%60).padStart(2,'0')}const h=Math.floor(el/3600),mm=Math.floor(el%3600/60),ss=el%60;return '⏱ '+(h?h+':'+String(mm).padStart(2,'0'):mm)+':'+String(ss).padStart(2,'0')}
@@ -657,7 +657,7 @@ function LOBBY(){const h=isHost();
  ${h?`<button class="b w roll" ${S.pl.length<2?'disabled':''} onclick="start()">🚀 ابدأ اللعبة (${S.pl.length})</button>${S.pl.length<2?'<p class=mut style="text-align:center">محتاج لاعبين على الأقل</p>':''}`:'<p class=tn style="text-align:center">مستني صاحب الغرفة يبدأ…</p>'}`}
 function cp(){try{navigator.clipboard.writeText(code);toast('اتنسخ ✅')}catch(e){toast(code)}}
 function HOME(){let sv='';try{const v=JSON.parse(localStorage.getItem('bksave')||'null');if(v&&v.S&&v.S.phase==='play')sv+=`<button class="b g w" onclick="resume()">▶ كمّل اللعبة الأونلاين المحفوظة (${v.code})</button>`;const l=JSON.parse(localStorage.getItem('bklocal')||'null');if(l&&l.phase==='play')sv+=`<button class="b g w" onclick="localResume()">▶ كمّل اللعبة اللي على الجهاز (جولة ${l.round})</button>`}catch(e){}
- let nm='';try{nm=localStorage.getItem('bknm')||''}catch(e){}
+ let nm='';try{nm=localStorage.getItem('bknm')||'';const j=JSON.parse(localStorage.getItem('bkjoin')||'null');if(j&&j.code)sv=`<button class="b w" onclick="rejoin()">▶ ارجع لغرفة ${j.code} (${j.name})</button>`+sv}catch(e){}
  return `<div class=logo>🏦 بنك الخربطة</div><p class="mut sub">مونوبولي على الطريقة المصرية — نرد، محافظات، بيوت، وكروت مصايب</p>
  <div class=card><h2>🌐 أونلاين مع صحابك</h2><input id=nm placeholder="اسمك" maxlength=12 value="${nm}"><button class="b w" onclick="create()">اعمل غرفة جديدة</button><div class=row2><input id=cd placeholder="كود الغرفة" autocapitalize=characters autocomplete=off><button class="b g" onclick="join()">ادخل</button></div></div>
  <div class=card><h2>📱 كلكم على موبايل واحد</h2><input id=lp placeholder="الأسماء بفاصلة: أحمد، سارة، علي"><button class="b g w" onclick="localStart()">ابدأ على الجهاز ده</button></div>
@@ -714,15 +714,15 @@ const showCard=(F,ic,t,d,cl,who)=>new Promise(res=>{const w=document.createEleme
 function fx(prev,s){FQ=FQ.then(()=>playFx(prev,s)).catch(()=>{})}
 async function playFx(prev,s){ANIM++;document.body.classList.add('anim');try{await playFx0(prev,s)}finally{if(s&&s.mv2)delete HP[s.mv2.p];ANIM--;if(!ANIM)document.body.classList.remove('anim');DHIDE=0;if(S&&S.phase==='play')render()}}
 const why=(s,p,d)=>{const L=s.evs||[],ab=String(Math.abs(d)),pk=L.find(x=>x.includes(p.name)&&x.includes(ab))||L.find(x=>x.includes(p.name));if(!pk)return '';return pk.replace(/^\p{Extended_Pictographic}️?\s*/u,'').replace(p.name,'').replace(/\s+/g,' ').trim().slice(0,32)};
-async function playFx0(prev,s){const F=$('fx'),B=$('ban');if(!F||!prev||prev.phase!=='play')return;const mi=s.pl.findIndex(p=>p.id===me),off=PF.anim==='off';
+async function playFx0(prev,s){const F=$('fx'),B=$('ban');if(!F||!prev||prev.phase!=='play')return;const mi=s.pl.findIndex(p=>p.id===me),st=()=>!S||S.en!==s.en,off=PF.anim==='off'||st();
  if(!off&&s.dice&&(!prev.dice||s.dice.n!==prev.dice.n)){await rollFx(F,s.dice,s.chaos);DHIDE=0;render()}
- if(!off&&s.mv2&&s.mv2.n>0){const m=s.mv2,j=m.p;HP[j]=m.f;placePawns();camApply(.3);await sleep(60);for(let k=1;k<=m.n;k++){HP[j]=(((m.f+m.d*k)%N)+N)%N;placePawns();if(PF.cam==='follow')camApply(.2);sfx('step');await sleep(180)}await sleep(120);delete HP[j];placePawns();render()}
+ if(!off&&!st()&&s.mv2&&s.mv2.n>0){const m=s.mv2,j=m.p;HP[j]=m.f;placePawns();camApply(.3);await sleep(60);for(let k=1;k<=m.n;k++){HP[j]=(((m.f+m.d*k)%N)+N)%N;placePawns();if(PF.cam==='follow')camApply(.2);sfx('step');await sleep(180)}await sleep(120);delete HP[j];placePawns();render()}
  for(const t of Object.keys(s.own))if(prev.own[t]!==s.own[t]){FLASH=+t;setTimeout(()=>{FLASH=-1},1000);sfx('buy');render()}
  s.pl.forEach((p,i)=>{const d=p.cash-((prev.pl[i]||p).cash);if(!d)return;const e=$('pp'+i);if(e){const r=e.getBoundingClientRect(),n=document.createElement('div');n.className='fn '+(d>0?'p':'n');const w=why(s,p,d);n.innerHTML=(d>0?'+':'−')+Math.abs(d)+(w?'<small>'+w+'</small>':'');n.style.left=(r.left+r.width/2-75)+'px';n.style.top=r.bottom+'px';F.appendChild(n);setTimeout(()=>n.remove(),1500)}if(i===mi){sfx(d>0?'good':'pay');if(d<0)vib(50)}});
- if(s.chaos&&s.round!==prev.round){const n=s.chaos.name.split(':');await showCard(F,'🌪',n[0],(n[1]||'').trim(),'',null)}
+ if(s.chaos&&s.round!==prev.round&&!st()){const n=s.chaos.name.split(':');await showCard(F,'🌪',n[0],(n[1]||'').trim(),'',null)}
  if(s.used&&s.used.n!==((prev.used&&prev.used.n)||0)&&AB[s.used.k]){const u=s.used,d=AB[u.k],mine=!LOCAL&&mi>=0&&s.pl[mi].name===u.w;if(!mine){sfx('tick');vib(40);await showCard(F,d[0],'🎴 '+u.w+' لعب «'+d[1]+'»',u.r,'used',null)}}
- if(s.dn&&s.dn!==(prev.dn||0)&&s.drawn&&AB[s.drawn]){const d=AB[s.drawn],bad=s.drawn[0]==='!';if(bad||LOCAL||(mi>=0&&s.pl[mi].name===s.dw)){sfx(bad?'bad':'good');if(bad)vib([70,40,70]);await showCard(F,d[0],d[1],d[2],bad?'pn':'',s.dw)}}
- for(const m of (s.evs||[]).filter(x=>/^\p{Extended_Pictographic}/u.test(x)).slice(-3)){const ic=(m.match(/^\p{Extended_Pictographic}️?/u)||['📣'])[0];B.innerHTML='';const a=document.createElement('span'),b=document.createElement('span');a.className='bi';a.textContent=ic;b.textContent=m.slice(ic.length).trim();B.append(a,b);B.className='show '+(/[💸🚔😴⚡🕳🧲🚨🏗🌧🍌🔥💍💡📝🔒🥫]/u.test(ic)?'bad':/[💰🎉🏠🎁🍲🏦🛒🏧💧🔓]/u.test(ic)?'good':'');await sleep(off?900:1250);B.className=''}}
+ if(s.dn&&s.dn!==(prev.dn||0)&&s.drawn&&AB[s.drawn]){const d=AB[s.drawn],bad=s.drawn[0]==='!';if(!st()&&(bad||LOCAL||(mi>=0&&s.pl[mi].name===s.dw))){sfx(bad?'bad':'good');if(bad)vib([70,40,70]);await showCard(F,d[0],d[1],d[2],bad?'pn':'',s.dw)}}
+ for(const m of (st()?[]:(s.evs||[]).filter(x=>/^\p{Extended_Pictographic}/u.test(x)).slice(-3))){if(st())break;const ic=(m.match(/^\p{Extended_Pictographic}️?/u)||['📣'])[0];B.innerHTML='';const a=document.createElement('span'),b=document.createElement('span');a.className='bi';a.textContent=ic;b.textContent=m.slice(ic.length).trim();B.append(a,b);B.className='show '+(/[💸🚔😴⚡🕳🧲🚨🏗🌧🍌🔥💍💡📝🔒🥫]/u.test(ic)?'bad':/[💰🎉🏠🎁🍲🏦🛒🏧💧🔓]/u.test(ic)?'good':'');await sleep(off?900:1250);B.className=''}}
 async function rollFx(F,d,ch){const cr=ch&&ch.id==='crowd',f=v=>cr&&v===6?3:v,vals=d.b?[d.a,d.b]:[d.a],o=document.createElement('div');o.className='dovl';
  o.innerHTML='<div class=dc>'+vals.map((v,i)=>`<div class="dd roll${i?'2':''}">${pipH(1+Math.floor(Math.random()*6))}</div>`).join('')+'</div><div class=dtot>🎲</div>';F.appendChild(o);sfx('roll');
  const els=[...o.querySelectorAll('.dd')],iv=setInterval(()=>els.forEach(e=>{e.innerHTML=pipH(1+Math.floor(Math.random()*6))}),80);await sleep(850);clearInterval(iv);
@@ -736,36 +736,66 @@ function onTurnChange(){document.body.classList.remove('busy');wl();if(S.tn!==LA
 setInterval(()=>{if(!S||S.phase!=='play')return;const c=$('clk');if(c)c.textContent=clockTxt();
  if(S.cfg.timer){const left=S.cfg.timer-Math.floor((Date.now()-OFF-(S.now||Date.now()))/1000),e=$('tmr');if(e)e.textContent='⏱ '+Math.max(0,left);
   if(left<=0&&S.auc&&(HOST||LOCAL)&&!ANIM&&!S.dbt.length){const a=S.auc,i=S.pl.findIndex((p,i)=>!p.out&&i!==a.by&&!a.ps.includes(i));if(i>=0)hostApply(S.pl[i].id,{a:'ap'});return}
-  if(left<=0&&(HOST||LOCAL)&&!ANIM&&!S.dbt.length&&!ask&&!MN){const p=S.pl[S.turn];if(p&&!p.out){const a=S.trade?null:S.stage==='move'?'r':S.stage==='buy'?(S.pend.m!==null?'y':'k'):S.stage==='after'?'e':S.stage==='jail'?'jr':null;
-   if(S.trade&&S.pl[S.trade.from]===p)hostApply(p.id,{a:'tc',en:S.en});else if(a)hostApply(p.id,{a,en:S.en})}}}
+  if(left<=0&&(HOST||LOCAL)&&!ANIM&&!S.dbt.length&&!ask&&!MN)autoAct()}
  if(S.cfg.gmin&&(HOST||LOCAL)){const el=Math.floor((Date.now()-S.gt)/1000);if(el>=S.cfg.gmin*60){const s=clone(S);s.phase='end';s.endWhy='time';lg(s,'⏳ الوقت خلص!');commit(s)}}},1000);
 
 // ================= الشبكة (MQTT) =================
-let conn=null,conns=[],HOST=false,mq=null,base='',cmap={};
+// المضيف هو اللي شايل اللعبة. كل لاعب بيبعت "نبضة" كل 3 ثواني فيها آخر نسخة عنده، ولو متأخر المضيف يبعتله النسخة الجديدة.
+// والمضيف بيبعت نبضة للكل، فلو حد فاته تحديث (النت قطع/الموبايل نام) بيتزامن لوحده، ولو لاعب غاب المضيف بيلعب بداله.
+let conn=null,conns=[],HOST=false,mq=null,base='',cmap={},LS={},OFFL=[],LASTHB=0,HSTART=0,HOSTOFF=0,PINGI=null;
+const QOS={qos:1};
 const pid=()=>{try{let v=localStorage.getItem('bkpid');if(!v){v='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('bkpid',v)}return v}catch(e){return 'u'+Math.random().toString(36).slice(2,10)}};
-const nmv=()=>{const n=clean($('nm').value)||'لاعب';try{localStorage.setItem('bknm',n)}catch(e){}return n};
-function hostMsg(cn,d){if(!d||!S)return;
- if(d.t==='join'){if((S.ban||[]).includes(String(d.id))){cn.send({t:'kicked'});return}cn.ok=true;const ex=S.pl.some(p=>p.id===d.id);if(S.phase==='lobby'&&!ex&&S.pl.length<10){const s=clone(S);s.pl.push(mkP(String(d.id),clean(d.name)||'لاعب'));fixLook(s);commit(s)}else cn.send({t:'s',s:S})}
- else if(d.t==='look'&&cn.ok&&S.phase==='lobby'){const i=S.pl.findIndex(p=>p.id===String(d.id));if(i>=0&&SHAPES.includes(d.ic)&&COLS.includes(d.col)&&!S.pl.some((p,j)=>j!==i&&p.col===d.col)){const s=clone(S);s.pl[i].ic=d.ic;s.pl[i].col=d.col;commit(s)}}
- else if(d.t==='act'&&cn.ok){const e0=S.en;hostApply(String(d.id),d.o);if(S.en===e0)cn.send({t:'s',s:S})}}
+const nmv=()=>{const n=clean($('nm')&&$('nm').value)||(()=>{try{return localStorage.getItem('bknm')}catch(e){return ''}})()||'لاعب';try{localStorage.setItem('bknm',n)}catch(e){}return n};
+const isOff=id=>OFFL.includes(id);
+function hostMsg(cn,d){if(!d||!S)return;const id=String(d.id||'');if(id)LS[id]=Date.now();
+ if(d.t==='join'){if((S.ban||[]).includes(id)){cn.send({t:'kicked'});return}cn.ok=true;const ex=S.pl.some(p=>p.id===id);
+  if(S.phase==='lobby'&&!ex&&S.pl.length<10){const s=clone(S);s.pl.push(mkP(id,clean(d.name)||'لاعب'));fixLook(s);commit(s)}
+  else if(!(d.en!=null&&d.en===S.en&&d.ph===S.phase))cn.send({t:'s',s:S})}
+ else if(d.t==='look'&&cn.ok&&S.phase==='lobby'){const i=S.pl.findIndex(p=>p.id===id);if(i>=0&&SHAPES.includes(d.ic)&&COLS.includes(d.col)&&!S.pl.some((p,j)=>j!==i&&p.col===d.col)){const s=clone(S);s.pl[i].ic=d.ic;s.pl[i].col=d.col;commit(s)}}
+ else if(d.t==='act'){cn.ok=true;const e0=S.en;hostApply(id,d.o);if(S.en===e0)cn.send({t:'s',s:S})}}
+// الحركة اللي الموبايل بيعملها بدل لاعب ساكت أو غايب
+function autoAct(){const p=S.pl[S.turn];if(!p||p.out)return false;
+ if(S.trade){if(S.pl[S.trade.from]===p){hostApply(p.id,{a:'tc',en:S.en});return true}return false}
+ const a=S.stage==='move'?'r':S.stage==='buy'?(S.pend&&S.pend.m!==null?'y':'k'):S.stage==='after'?'e':S.stage==='jail'?'jr':null;if(a){hostApply(p.id,{a,en:S.en});return true}return false}
+function hostBeat(){if(!HOST||!S)return;const now=Date.now();
+ OFFL=S.pl.filter(p=>!p.out&&p.id!==me&&now-(LS[p.id]||HSTART)>15000).map(p=>p.id);
+ try{mq&&mq.connected&&mq.publish(base+'/hb',JSON.stringify({en:S.en||0,ph:S.phase,off:OFFL}))}catch(e){}
+ if(S.phase!=='play'||ANIM)return;const idle=now-(S.now||now);
+ if(S.auc){const a=S.auc,i=S.pl.findIndex((p,i)=>!p.out&&i!==a.by&&!a.ps.includes(i)&&isOff(p.id));if(i>=0&&idle>3000)hostApply(S.pl[i].id,{a:'ap'});return}
+ if(S.dbt.length)return;
+ if(S.trade&&isOff(S.pl[S.trade.to].id)&&idle>5000){hostApply(S.pl[S.trade.to].id,{a:'tr'});return}
+ for(let k=0;k<5;k++){const p=S.pl[S.turn];if(S.phase!=='play'||S.auc||S.dbt.length||!p||p.out||!isOff(p.id))break;if(!autoAct())break}}
 function create(){me=pid();const n=nmv();toast('بجهّز الغرفة…');startHost(null,{phase:'lobby',host:me,cfg:Object.assign({},CFG0),pl:[Object.assign(mkP(me,n),{col:COLS[0]})]})}
 const BRK=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081'];
 const ALPH='ABCDEFGHJKMNPQRSTUVWXYZ23456789',rc=n=>Array.from({length:n},()=>ALPH[Math.floor(Math.random()*ALPH.length)]).join('');
-function mconn(i,ok,fail){if(typeof mqtt==='undefined'){toast('مكتبة الاتصال ماتحمّلتش، جرّب تاني');return}const c=mqtt.connect(BRK[i],{clientId:'bkh_'+rc(10),reconnectPeriod:2000,connectTimeout:7000,clean:true});let done=false;
+function mconn(i,ok,fail){if(typeof mqtt==='undefined'){toast('مكتبة الاتصال ماتحمّلتش، جرّب تاني');return}const c=mqtt.connect(BRK[i],{clientId:'bkh_'+rc(10),reconnectPeriod:1500,connectTimeout:7000,keepalive:15,clean:true,resubscribe:true});let done=false;
  c.on('connect',()=>{if(!done){done=true;ok(c)}});c.on('error',()=>{});setTimeout(()=>{if(!done){done=true;try{c.end(true)}catch(e){}fail()}},8000)}
 function startHost(c,st){HOST=false;
  const tryB=i=>{if(i>=BRK.length){toast('تعذر الاتصال بأي خادم، جرّب شبكة تانية');return}const idx=c?Number(c[0])-1:i;
-  mconn(idx,cl=>{mq=cl;code=c||String(idx+1)+rc(7);base='bkhg/'+code;cl.subscribe(base+'/up');
-   cl.on('message',(t,p)=>{let m;try{m=JSON.parse(p.toString())}catch(e){return}if(!m.from||!m.d)return;let cn=cmap[m.from];if(!cn){cn=cmap[m.from]={ok:false,get open(){return !!mq&&mq.connected},send:x=>{try{mq.publish(base+'/dn/'+m.from,JSON.stringify(x))}catch(e){}}};conns.push(cn)}hostMsg(cn,m.d)});
-   if(!HOST){HOST=true;S=st;if(!S.host)S.host=me;toast('الغرفة جاهزة ✅ الكود: '+code)}render()},()=>{c?toast('تعذر الاتصال بالخادم'):tryB(i+1)})};
+  mconn(idx,cl=>{mq=cl;code=c||String(idx+1)+rc(7);base='bkhg/'+code;cl.subscribe(base+'/up',QOS);cl.on('connect',()=>cl.subscribe(base+'/up',QOS));
+   cl.on('message',(t,p)=>{let m;try{m=JSON.parse(p.toString())}catch(e){return}if(!m.from||!m.d)return;let cn=cmap[m.from];if(!cn){cn=cmap[m.from]={ok:false,get open(){return !!mq&&mq.connected},send:x=>{try{mq.publish(base+'/dn/'+m.from,JSON.stringify(x),QOS)}catch(e){}}};conns.push(cn)}hostMsg(cn,m.d)});
+   if(!HOST){HOST=true;S=st;if(!S.host)S.host=me;HSTART=Date.now();setInterval(hostBeat,3000);toast('الغرفة جاهزة ✅ الكود: '+code)}render()},()=>{c?toast('تعذر الاتصال بالخادم'):tryB(i+1)})};
  tryB(0)}
 function resume(){try{const v=JSON.parse(localStorage.getItem('bksave'));me=pid();toast('برجّع الغرفة…');startHost(v.code,v.S)}catch(e){toast('تعذر الاستعادة')}}
-function join(){me=pid();code=$('cd').value.toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==8||!'123'.includes(code[0])){toast('الكود غلط، لازم 8 حروف وأرقام');return}const n=nmv();toast('بدخل الغرفة…');base='bkhg/'+code;const jm={t:'join',id:me,name:n};
- mconn(Number(code[0])-1,cl=>{mq=cl;cl.subscribe(base+'/dn/'+me);conn={get open(){return !!mq&&mq.connected},send:x=>mq.publish(base+'/up',JSON.stringify({from:me,d:x}))};
-  cl.on('message',(t,p)=>{let d;try{d=JSON.parse(p.toString())}catch(e){return}
-   if(d&&d.t==='s'){if(S&&S.phase==='play'&&d.s.phase==='play'&&(d.s.en||0)<(S.en||0))return;S=d.s;if(S.now)OFF=Date.now()-S.now;ask=null;if(S.ban&&S.ban.includes(me)&&!S.pl.some(p=>p.id===me)){toast('صاحب الغرفة طردك');S=null;mq.end(true)}render()}
-   else if(d&&d.t==='kicked')toast('صاحب الغرفة طردك من الغرفة')});
-  cl.on('connect',()=>conn.send(jm));conn.send(jm);setInterval(()=>{if(!S&&conn.open)conn.send(jm)},3000);
+function rejoin(){try{const v=JSON.parse(localStorage.getItem('bkjoin'));join(v.code,v.name)}catch(e){toast('تعذر الرجوع')}}
+function ping(){if(conn&&conn.open)try{conn.send({t:'join',id:me,name:MYN,en:S?S.en:null,ph:S?S.phase:null})}catch(e){}}
+let MYN='';
+function join(c0,n0){me=pid();code=(c0||($('cd')&&$('cd').value)||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==8||!'123'.includes(code[0])){toast('الكود غلط، لازم 8 حروف وأرقام');return}
+ MYN=n0||nmv();toast('بدخل الغرفة…');base='bkhg/'+code;
+ mconn(Number(code[0])-1,cl=>{mq=cl;const sub=()=>{cl.subscribe(base+'/dn/'+me,QOS);cl.subscribe(base+'/hb')};sub();
+  conn={get open(){return !!mq&&mq.connected},send:x=>mq.publish(base+'/up',JSON.stringify({from:me,d:x}),QOS)};
+  cl.on('message',(t,p)=>{let d;try{d=JSON.parse(p.toString())}catch(e){return}if(!d)return;
+   if(t===base+'/hb'){LASTHB=Date.now();const o=JSON.stringify(OFFL),was=HOSTOFF;OFFL=d.off||[];HOSTOFF=0;if(!S||(d.en||0)!==(S.en||0)||d.ph!==S.phase)ping();if(o!==JSON.stringify(OFFL)||was)render();return}
+   if(d.t==='s'){LASTHB=Date.now();if(S&&S.phase==='play'&&d.s.phase==='play'&&(d.s.en||0)<(S.en||0))return;S=d.s;if(S.now)OFF=Date.now()-S.now;
+    if(S.ban&&S.ban.includes(me)&&!S.pl.some(p=>p.id===me)){toast('صاحب الغرفة طردك');S=null;try{localStorage.removeItem('bkjoin')}catch(e){};mq.end(true);render();return}
+    try{if(S.phase==='end')localStorage.removeItem('bkjoin');else localStorage.setItem('bkjoin',JSON.stringify({code,name:MYN}))}catch(e){}
+    if(ask&&!(S.phase==='play'&&S.pl[S.turn].id===me&&S.stage==='move'))ask=null;render()}
+   else if(d.t==='kicked'){toast('صاحب الغرفة طردك من الغرفة');try{localStorage.removeItem('bkjoin')}catch(e){}}});
+  cl.on('connect',()=>{sub();ping()});ping();LASTHB=Date.now();clearInterval(PINGI);PINGI=setInterval(ping,3000);
   setTimeout(()=>{if(!S)toast('لسه مفيش رد. اتأكد من الكود وإن المضيف فاتح الصفحة')},10000)},()=>toast('تعذر الاتصال بالخادم، جرّب تاني'))}
+// لما الموبايل يصحى أو التاب يرجع: نعيد الاتصال ونطلب آخر نسخة
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if(mq&&!mq.connected){try{mq.reconnect()}catch(e){}}ping();if(HOST)hostBeat()});
+window.addEventListener('online',()=>{if(mq&&!mq.connected){try{mq.reconnect()}catch(e){}}ping()});
+setInterval(()=>{if(HOST||LOCAL||!conn||!S)return;const off=Date.now()-LASTHB>12000;if(off!==!!HOSTOFF){HOSTOFF=off?1:0;render()}},1000);
 render();
 </script></body></html>
